@@ -26,6 +26,7 @@ require_once LLH_CORE_DIR . 'includes/class-submission.php';
 require_once LLH_CORE_DIR . 'includes/class-quotes.php';
 require_once LLH_CORE_DIR . 'includes/class-reviews.php';
 require_once LLH_CORE_DIR . 'includes/class-stripe.php';
+require_once LLH_CORE_DIR . 'includes/class-setup.php';
 
 LLH_Post_Types::init();
 LLH_Admin::init();
@@ -44,6 +45,7 @@ register_deactivation_hook( __FILE__, 'llh_core_deactivate' );
  */
 function llh_core_activate() {
 	LLH_Post_Types::register();
+	LLH_Setup::install();
 	flush_rewrite_rules();
 
 	if ( ! wp_next_scheduled( 'llh_daily_maintenance' ) ) {

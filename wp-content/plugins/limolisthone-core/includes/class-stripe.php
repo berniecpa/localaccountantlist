@@ -27,6 +27,7 @@ class LLH_Stripe {
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'admin_post_llh_boost_checkout', array( __CLASS__, 'handle_checkout' ) );
 		add_action( 'admin_post_nopriv_llh_boost_checkout', array( __CLASS__, 'handle_checkout' ) );
+		add_action( 'admin_post_llh_create_webhook', array( __CLASS__, 'handle_create_webhook' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'register_webhook_route' ) );
 	}
 
@@ -37,6 +38,7 @@ class LLH_Stripe {
 				'secret_key'     => '',
 				'price_id'       => '',
 				'webhook_secret' => '',
+				'webhook_id'     => '',
 			)
 		);
 	}
@@ -70,11 +72,15 @@ class LLH_Stripe {
 	}
 
 	public static function sanitize_settings( $input ) {
-		$input = (array) $input;
+		$input    = (array) $input;
+		$existing = self::settings();
 		return array(
 			'secret_key'     => isset( $input['secret_key'] ) ? trim( sanitize_text_field( $input['secret_key'] ) ) : '',
 			'price_id'       => isset( $input['price_id'] ) ? trim( sanitize_text_field( $input['price_id'] ) ) : '',
 			'webhook_secret' => isset( $input['webhook_secret'] ) ? trim( sanitize_text_field( $input['webhook_secret'] ) ) : '',
+			// Not part of the form; preserved across saves, set by the
+			// create-webhook handler below.
+			'webhook_id'     => isset( $input['webhook_id'] ) ? trim( sanitize_text_field( $input['webhook_id'] ) ) : $existing['webhook_id'],
 		);
 	}
 
@@ -83,9 +89,17 @@ class LLH_Stripe {
 			return;
 		}
 		$s = self::settings();
+
+		$notice = isset( $_GET['llh_webhook'] ) ? sanitize_key( $_GET['llh_webhook'] ) : '';
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Boost Settings (Stripe)', 'limolisthone' ); ?></h1>
+
+			<?php if ( 'created' === $notice ) : ?>
+				<div class="notice notice-success"><p><?php esc_html_e( 'Stripe webhook created — the signing secret was saved automatically. Boost payments are fully wired up.', 'limolisthone' ); ?></p></div>
+			<?php elseif ( 'error' === $notice ) : ?>
+				<div class="notice notice-error"><p><?php esc_html_e( 'Stripe rejected the webhook request. Check that the secret key is valid and this site is reachable over HTTPS, then try again.', 'limolisthone' ); ?></p></div>
+			<?php endif; ?>
 			<p>
 				<?php esc_html_e( 'Companies pay a recurring Stripe subscription to have their listing shown first in directory results.', 'limolisthone' ); ?>
 			</p>
@@ -130,8 +144,84 @@ class LLH_Stripe {
 				</table>
 				<?php submit_button(); ?>
 			</form>
+
+			<hr />
+			<h2><?php esc_html_e( 'Webhook', 'limolisthone' ); ?></h2>
+			<?php if ( $s['webhook_id'] && $s['webhook_secret'] ) : ?>
+				<p>
+					<?php
+					printf(
+						/* translators: %s: Stripe webhook endpoint ID */
+						esc_html__( 'Webhook %s is registered with Stripe and its signing secret is stored. Nothing more to do.', 'limolisthone' ),
+						'<code>' . esc_html( $s['webhook_id'] ) . '</code>'
+					);
+					?>
+				</p>
+			<?php elseif ( $s['secret_key'] ) : ?>
+				<p><?php esc_html_e( 'Instead of creating the webhook by hand in the Stripe dashboard, let this site register it for you — the signing secret is stored automatically.', 'limolisthone' ); ?></p>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<input type="hidden" name="action" value="llh_create_webhook" />
+					<?php wp_nonce_field( 'llh_create_webhook', 'llh_webhook_nonce' ); ?>
+					<?php submit_button( __( 'Create webhook automatically', 'limolisthone' ), 'secondary', 'submit', false ); ?>
+				</form>
+			<?php else : ?>
+				<p class="description"><?php esc_html_e( 'Save your Stripe secret key first, then the webhook can be created automatically.', 'limolisthone' ); ?></p>
+			<?php endif; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Register this site's webhook endpoint with Stripe and store the
+	 * signing secret (only returned at creation time).
+	 */
+	public static function handle_create_webhook() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to do that.', 'limolisthone' ) );
+		}
+		if ( ! isset( $_POST['llh_webhook_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['llh_webhook_nonce'] ), 'llh_create_webhook' ) ) {
+			wp_die( esc_html__( 'Security check failed. Please go back and try again.', 'limolisthone' ) );
+		}
+
+		$settings = self::settings();
+		$back     = admin_url( 'edit.php?post_type=limo_listing&page=llh-stripe' );
+
+		if ( ! $settings['secret_key'] ) {
+			wp_safe_redirect( add_query_arg( 'llh_webhook', 'error', $back ) );
+			exit;
+		}
+
+		$response = wp_remote_post(
+			'https://api.stripe.com/v1/webhook_endpoints',
+			array(
+				'timeout' => 20,
+				'headers' => array(
+					'Authorization' => 'Bearer ' . $settings['secret_key'],
+					'Content-Type'  => 'application/x-www-form-urlencoded',
+				),
+				'body'    => array(
+					'url'               => rest_url( 'limolisthone/v1/stripe-webhook' ),
+					'description'       => 'LimoListHone boost subscriptions (created by the plugin)',
+					'enabled_events[0]' => 'checkout.session.completed',
+					'enabled_events[1]' => 'invoice.paid',
+					'enabled_events[2]' => 'customer.subscription.deleted',
+				),
+			)
+		);
+
+		$endpoint = is_wp_error( $response ) ? null : json_decode( wp_remote_retrieve_body( $response ), true );
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) || empty( $endpoint['secret'] ) || empty( $endpoint['id'] ) ) {
+			wp_safe_redirect( add_query_arg( 'llh_webhook', 'error', $back ) );
+			exit;
+		}
+
+		$settings['webhook_secret'] = sanitize_text_field( $endpoint['secret'] );
+		$settings['webhook_id']     = sanitize_text_field( $endpoint['id'] );
+		update_option( self::OPTION, $settings );
+
+		wp_safe_redirect( add_query_arg( 'llh_webhook', 'created', $back ) );
+		exit;
 	}
 
 	/* ---------------------------------------------------------------------
