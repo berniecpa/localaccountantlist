@@ -16,7 +16,7 @@ $rating     = class_exists( 'LLH_Reviews' ) ? LLH_Reviews::rating( $listing_id )
 		<?php if ( has_post_thumbnail() ) : ?>
 			<?php the_post_thumbnail( 'llh-card' ); ?>
 		<?php else : ?>
-			<span class="llh-noimg" aria-hidden="true">&#128663;</span>
+			<span class="llh-noimg" aria-hidden="true"><?php esc_html_e( 'No photo yet', 'limolisthone' ); ?></span>
 		<?php endif; ?>
 		<?php if ( $boosted ) : ?>
 			<span class="llh-badge"><?php esc_html_e( 'Featured', 'limolisthone' ); ?></span>

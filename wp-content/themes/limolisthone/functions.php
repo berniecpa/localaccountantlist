@@ -102,13 +102,13 @@ function llh_card_meta( $listing_id ) {
 
 	$areas = get_the_term_list( $listing_id, 'service_area', '', ', ' );
 	if ( $areas && ! is_wp_error( $areas ) ) {
-		$bits[] = '<span>&#128205; ' . wp_kses_post( $areas ) . '</span>';
+		$bits[] = '<span>' . wp_kses_post( $areas ) . '</span>';
 	}
 
 	$capacity = (int) get_post_meta( $listing_id, '_llh_max_capacity', true );
 	if ( $capacity ) {
 		/* translators: %d: passenger count */
-		$bits[] = '<span>&#128101; ' . esc_html( sprintf( __( 'Up to %d', 'limolisthone' ), $capacity ) ) . '</span>';
+		$bits[] = '<span>' . esc_html( sprintf( __( 'Up to %d passengers', 'limolisthone' ), $capacity ) ) . '</span>';
 	}
 
 	$price = get_post_meta( $listing_id, '_llh_price_range', true );

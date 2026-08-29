@@ -241,7 +241,8 @@ h1, h2, h3, h4 {
 .llh-card__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .llh-card__media .llh-noimg {
 	display: flex; align-items: center; justify-content: center;
-	height: 100%; color: var(--llh-line); font-size: 3rem;
+	height: 100%; color: var(--llh-line);
+	font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase;
 }
 
 .llh-badge {
