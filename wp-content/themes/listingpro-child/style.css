@@ -1,0 +1,10 @@
+/*
+Theme Name:  ListingPro Child — Local Limo Guide
+Template:    listingpro
+Description: Child theme for locallimoguide.com. Holds site-specific CSS and PHP overrides so ListingPro updates never wipe customizations.
+Version:     1.0.0
+License:     Themeforest Split Licence
+Text Domain: listingpro-child
+*/
+
+/* Site-specific tweaks go below. Parent stylesheet is enqueued by functions.php. */
