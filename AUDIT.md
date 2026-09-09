@@ -1,61 +1,67 @@
-# LocalLimoGuide.com — Launch Audit (2026-08-30)
+# LocalAccountantList.com — Launch Audit (2026-09-09)
 
-Site: ListingPro theme + listingpro-plugin, Elementor, CubeWP, SEO Repair Kit on WordPress 7.1.
-Everything below was verified against the live site.
+Site: ListingPro theme + listingpro-plugin, Elementor, CubeWP on WordPress.
+The ListingPro license is registered to this domain — unlike the old limo domain,
+the "Select Your Plan" page renders correctly here (no license warning), so
+submissions and paid plans are available. Verified against the live site.
 
-## 🔴 Blockers (site can't take paying customers until these are done)
+## 🔴 High priority (the "it's still the demo" problems)
 
-1. **ListingPro license not activated.** The Submit Your Listing page renders only
-   "Please activate your license" — listing submission, claims, and pricing plans are
-   disabled until the ThemeForest purchase code is entered.
-   → wp-admin → ListingPro (Theme Options) → license activation, paste your Envato purchase code.
-2. **Plain permalinks.** All URLs are `?p=123` / `?listing=slug` style — bad for SEO and
-   ugly on shared links. Fixed automatically by `setup/apply.sh` (sets `/%postname%/`).
-
-## 🟠 High priority (the "it's still the demo" problems)
-
-3. **All 27 listings are demo businesses** (Sushi Kashiba, The Mark Hotel, Subway, museums…)
-   across 11 generic categories (Restaurant, Beauty & Spa, Real Estate…) and 12 demo cities
-   (Seattle, Denver, New York…). `setup/limo-seed.php` drafts the demo listings, adds limo
-   categories (Stretch Limo, Party Bus, SUV Limo, Executive Sedan, Sprinter Van, Classic Car),
-   limo features (Wet bar, WiFi, Red carpet…), your service cities, and 3 sample limo listings.
-4. **Homepage is stock ListingPro copy** — "Explore Your City", "eat, drink, and shop",
-   restaurant hero collage, "Happening Cities" with the Golden Gate Bridge. The seeder
-   rewrites the text (with a backup of the original); the hero/city **images** must be swapped
-   in Elementor (or send me images and I'll wire them once the theme code is in the repo).
-5. **ListingPro branding everywhere**: header logo is the ListingPro logo, footer says
-   "Copyright © 2023 ListingProWP / Developed by Cridio Studio". Logo + footer text live in
-   ListingPro Theme Options → General/Footer. (Send me a logo, or I can generate one.)
+1. **Plain permalinks.** URLs are `?cat=1` / `?listing-category=restaurant` style —
+   bad for SEO. Fixed automatically by `setup/apply.sh` (sets `/%postname%/`).
+2. **All 33 listings are demo businesses** (restaurants, barbershops, museums…)
+   across generic categories (Restaurant, Beauty & Spa, Hotels…) and demo cities.
+   `setup/seed.php` drafts the demo listings and creates the accounting structure:
+   - Categories: Tax Preparation, Bookkeeping, CPA Firm, Payroll Services,
+     Audit & Assurance, Business Advisory, Forensic Accounting
+   - Features: IRS Representation, QuickBooks ProAdvisor, Free Consultation,
+     Virtual Appointments, Small Business Specialist, Individual Tax Returns,
+     Spanish Speaking, Year-Round Service
+   - Cities: New York, LA, Chicago, Houston, Miami, Dallas, Atlanta, Phoenix
+     (edit the list at the top of seed.php before running)
+   - 3 sample firm listings (Summit Tax & Accounting, Ledger & Main Bookkeeping,
+     Hartwell CPA Group)
+3. **Homepage is stock ListingPro copy** — "Explore Your City", "eat, drink, and
+   shop", restaurant hero collage. The seeder rewrites the text to accounting copy
+   (original backed up in post meta). The hero/city **images** still need swapping
+   in Elementor — professional/office imagery instead of restaurants.
+4. **ListingPro branding**: header logo + "Copyright © ListingProWP" footer.
+   Change in ListingPro Theme Options → General/Footer. (Send me a logo, or I can
+   generate one for Local Accountant List.)
 
 ## 🟡 Medium priority
 
-6. **Horizontal page overflow** — the homepage scrolls sideways (content column ~2035px wide
-   against a 1440px viewport), typical after a demo import.
-   → Elementor → Tools → Regenerate CSS & Data (apply.sh also clears the Elementor cache).
-7. **No favicon** (`<link rel="shortcut icon" href="">` is empty). Theme Options or
-   Customizer → Site Identity.
-8. **Demo blog posts** ("Hello world!", "Excited news about arrival fashion.",
-   "Reduce Unwanted Wrinkles") — draft or replace with limo content.
-9. **No XML sitemap** (`/sitemap.xml` returns the homepage). Enable in your SEO plugin, or
-   WordPress core's `/wp-sitemap.xml` works once permalinks are pretty.
-10. **Search placeholder** says "Ex: food, service, barber, hotel" — change to
-    "Ex: stretch limo, party bus, airport transfer" in Theme Options → Header/Search.
+5. **Page-width overflow** on Elementor pages after demo import →
+   Elementor → Tools → Regenerate CSS & Data (apply.sh also clears Elementor cache).
+6. **Favicon** missing → Customizer → Site Identity.
+7. **Demo blog posts** — replace with content that earns accountant-directory
+   traffic: filing deadline calendars, "CPA vs EA vs bookkeeper", state tax guides.
+8. **XML sitemap** — enable in the SEO plugin once permalinks are pretty.
+9. **Search placeholder** ("Ex: food, service, barber, hotel") — the seeder swaps
+   the homepage instance; check Theme Options → Header for other spots.
 
-## 💰 Monetization (Phase D — after the license is activated)
+## 💰 Monetization — Featured firm listings (built into ListingPro)
 
-ListingPro has this built in; no custom code needed:
-1. wp-admin → **Pricing Plans → Add New**: name "Featured", price **99**, billing **Monthly**,
-   enable **Featured/Ad** flag (listing shows the Ad badge + ranks first, like the demo's
-   "Sauce & Barrel" card). Optionally add a Free basic plan so companies can list free and upgrade.
-2. **Theme Options → Payments**: enable **Stripe**, paste your Stripe publishable + secret keys
-   (test keys first), set currency USD.
-3. **Theme Options → Submission**: require a plan on submit, enable claims ("Claim your business")
-   so you can pre-load limo companies and let owners claim + upgrade them.
-4. Test: submit a listing, pick Featured, pay with card 4242 4242 4242 4242.
+1. wp-admin → **Pricing Plans → Add New**: e.g. "Featured Firm", **$99/month**
+   (or your price), enable the **Featured/Ad** flag so the listing gets the badge
+   and ranks first. Add a **Free** basic plan so firms can list free and upgrade.
+2. **Theme Options → Payments**: enable **Stripe**, paste publishable + secret keys
+   (test mode first), currency USD.
+3. **Theme Options → Submission**: require a plan on submit; enable **claims** so
+   you can pre-load real firms and let owners claim + upgrade their listing.
+   (Pre-loading real local firms is the classic directory cold-start move —
+   I can help build that list per city when you're ready.)
+4. Test with Stripe test card 4242 4242 4242 4242, then switch to live keys.
 
 ## What runs automatically
 
-`bash setup/apply.sh` on the VPS does: DB backup → install listingpro-child theme →
-run limo-seed.php (categories/features/cities/sample listings/homepage copy/tagline,
-demo listings drafted) → pretty permalinks → clear Elementor + rewrite caches.
-Everything it changes is reversible: DB backup file + `_llh_backup` copies of edited content.
+On the VPS:
+
+```bash
+curl -sL https://raw.githubusercontent.com/berniecpa/limolisthone/claude/wordpress-customization-x8wyf5/setup/apply.sh | bash
+```
+
+DB backup → install listingpro-child theme (inactive unless `--activate-child`) →
+run seed.php (accounting categories/features/cities, demo listings drafted,
+3 sample firms, homepage copy rewrite with backup, tagline, pretty permalinks) →
+flush caches. Revert anytime: `wp db import <backup file printed at the end>`.

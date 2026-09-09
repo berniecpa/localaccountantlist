@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #
-# Local Limo Guide — apply the limo conversion to the live site.
+# Local Accountant List — apply the accounting-directory conversion to the live site.
 #
 # Run on the VPS (SSH), either of:
-#   curl -sL https://raw.githubusercontent.com/berniecpa/limolisthone/claude/wordpress-customization-x8wyf5/setup/apply.sh | bash -s -- --path /home/SITEUSER/htdocs/locallimoguide.com
-#   git clone ... && bash setup/apply.sh --path /home/SITEUSER/htdocs/locallimoguide.com
+#   curl -sL https://raw.githubusercontent.com/berniecpa/limolisthone/claude/wordpress-customization-x8wyf5/setup/apply.sh | bash -s -- --path /home/SITEUSER/htdocs/localaccountantlist.com
+#   git clone ... && bash setup/apply.sh --path /home/SITEUSER/htdocs/localaccountantlist.com
 #
 # What it does, in order:
 #   1. Takes a full database backup (wp db export) next to wp-config.php
 #   2. Installs the listingpro-child theme (does NOT activate it unless --activate-child)
-#   3. Runs setup/limo-seed.php: limo categories/features/cities, demo listings
+#   3. Runs setup/seed.php: accounting categories/features/cities, demo listings
 #      drafted, 3 sample listings, homepage copy rewrite (with backups),
 #      tagline, pretty permalinks
 #   4. Flushes rewrite + Elementor caches
@@ -74,7 +74,7 @@ wp core is-installed || fail "WordPress at $WP_PATH is not installed."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
 SRC=""
 CLEANUP=""
-if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/limo-seed.php" ]; then
+if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/seed.php" ]; then
 	SRC="$(cd "$SCRIPT_DIR/.." && pwd)"
 	say "Using local repo at $SRC"
 else
@@ -109,8 +109,8 @@ else
 	say "Child theme installed but NOT activated (re-run with --activate-child when you want it)."
 fi
 
-say "Running the limo seeder ..."
-wp eval-file "$SRC/setup/limo-seed.php"
+say "Running the accounting-directory seeder ..."
+wp eval-file "$SRC/setup/seed.php"
 
 say "Flushing caches ..."
 wp rewrite flush --hard 2>/dev/null || wp rewrite flush
@@ -122,15 +122,14 @@ SITE_URL="$(wp option get siteurl)"
 cat <<DONE
 
 ------------------------------------------------------------------
-  Limo conversion applied. 🚘
+  Accounting-directory conversion applied. 📊
 
   Check the site:  $SITE_URL
 
   Still manual (see AUDIT.md in the repo):
-    1. ListingPro license activation  ← unblocks submissions & payments
-    2. Logo + favicon (Theme Options)
-    3. Hero/city images in Elementor
-    4. Pricing Plans + Stripe keys (Featured \$99/mo)
+    1. Logo + favicon (Theme Options)
+    2. Hero/city images in Elementor
+    3. Pricing Plans + Stripe keys (Featured \$99/mo)
 
   Revert everything:  wp db import $BACKUP
 ------------------------------------------------------------------

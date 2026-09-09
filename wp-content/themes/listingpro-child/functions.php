@@ -1,6 +1,6 @@
 <?php
 /**
- * ListingPro child theme for locallimoguide.com.
+ * ListingPro child theme for localaccountantlist.com.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
