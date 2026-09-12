@@ -60,7 +60,7 @@ run_as() {
 if command -v wp >/dev/null 2>&1; then
 	WP_BIN=(wp)
 else
-	WPCLI="/tmp/llh-wp-cli.phar"
+	WPCLI="/tmp/lal-wp-cli.phar"
 	[ -f "$WPCLI" ] || { say "Downloading wp-cli ..."; curl -sSL -o "$WPCLI" https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar; chmod +r "$WPCLI"; }
 	WP_BIN=(php "$WPCLI")
 fi
@@ -86,7 +86,7 @@ else
 fi
 
 say "Backing up database ..."
-BACKUP="$WP_PATH/llh-backup-$(date +%Y%m%d-%H%M%S).sql"
+BACKUP="$WP_PATH/lal-backup-$(date +%Y%m%d-%H%M%S).sql"
 wp db export "$BACKUP"
 say "Backup: $BACKUP  (revert any time with: wp db import $BACKUP)"
 

@@ -8,7 +8,7 @@
  *
  * Idempotent: safe to run repeatedly. Nothing is deleted — demo listings are
  * drafted, and content edited in place is backed up first
- * (post meta `_elementor_data_llh_backup`).
+ * (post meta `_elementor_data_lal_backup`).
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -212,9 +212,9 @@ $front_id = (int) get_option( 'page_on_front' );
 if ( $front_id ) {
 	$data = get_post_meta( $front_id, '_elementor_data', true );
 	if ( $data && is_string( $data ) ) {
-		if ( ! get_post_meta( $front_id, '_elementor_data_llh_backup', true ) ) {
-			update_post_meta( $front_id, '_elementor_data_llh_backup', wp_slash( $data ) );
-			lal_say( '  backup saved to _elementor_data_llh_backup' );
+		if ( ! get_post_meta( $front_id, '_elementor_data_lal_backup', true ) ) {
+			update_post_meta( $front_id, '_elementor_data_lal_backup', wp_slash( $data ) );
+			lal_say( '  backup saved to _elementor_data_lal_backup' );
 		}
 		$replaced = 0;
 		foreach ( $lal_copy_swaps as $old => $new ) {

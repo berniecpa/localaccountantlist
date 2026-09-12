@@ -1,8 +1,8 @@
 # LocalAccountantList.com — Launch Audit (2026-09-09)
 
 Site: ListingPro theme + listingpro-plugin, Elementor, CubeWP on WordPress.
-The ListingPro license is registered to this domain — unlike the old limo domain,
-the "Select Your Plan" page renders correctly here (no license warning), so
+The ListingPro license is registered to this domain — so
+the "Select Your Plan" page renders correctly (no license warning) and
 submissions and paid plans are available. Verified against the live site.
 
 ## 🔴 High priority (the "it's still the demo" problems)
