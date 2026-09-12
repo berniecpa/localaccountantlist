@@ -58,7 +58,7 @@ submissions and paid plans are available. Verified against the live site.
 On the VPS:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/berniecpa/limolisthone/claude/wordpress-customization-x8wyf5/setup/apply.sh | bash
+curl -sL https://raw.githubusercontent.com/berniecpa/localaccountantlist/claude/wordpress-customization-x8wyf5/setup/apply.sh | bash
 ```
 
 DB backup → install listingpro-child theme (inactive unless `--activate-child`) →

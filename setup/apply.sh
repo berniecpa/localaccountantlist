@@ -3,7 +3,7 @@
 # Local Accountant List — apply the accounting-directory conversion to the live site.
 #
 # Run on the VPS (SSH), either of:
-#   curl -sL https://raw.githubusercontent.com/berniecpa/limolisthone/claude/wordpress-customization-x8wyf5/setup/apply.sh | bash -s -- --path /home/SITEUSER/htdocs/localaccountantlist.com
+#   curl -sL https://raw.githubusercontent.com/berniecpa/localaccountantlist/claude/wordpress-customization-x8wyf5/setup/apply.sh | bash -s -- --path /home/SITEUSER/htdocs/localaccountantlist.com
 #   git clone ... && bash setup/apply.sh --path /home/SITEUSER/htdocs/localaccountantlist.com
 #
 # What it does, in order:
@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-REPO="berniecpa/limolisthone"
+REPO="berniecpa/localaccountantlist"
 BRANCH="claude/wordpress-customization-x8wyf5"
 WP_PATH=""
 ACTIVATE_CHILD=0
