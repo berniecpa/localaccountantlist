@@ -48,6 +48,11 @@ fi
 [ -f "$WP_PATH/wp-config.php" ] || fail "$WP_PATH does not look like a WordPress root."
 say "WordPress root: $WP_PATH"
 
+if [ ! -w "$WP_PATH/wp-content/themes" ] && [ "$(id -un)" != "root" ]; then
+	fail "Your SSH user can't write to $WP_PATH/wp-content.
+Re-run as root, or as the site user ($(stat -c '%U' "$WP_PATH"))."
+fi
+
 SITE_OWNER="$(stat -c '%U' "$WP_PATH")"
 run_as() {
 	if [ "$(id -un)" = "root" ] && [ "$SITE_OWNER" != "root" ]; then
@@ -57,15 +62,41 @@ run_as() {
 	fi
 }
 
-if command -v wp >/dev/null 2>&1; then
+WP_FLAGS=( "--path=$WP_PATH" )
+if [ "$(id -un)" = "root" ] || [ "$SITE_OWNER" = "root" ]; then
+	WP_FLAGS+=( "--allow-root" )
+fi
+
+# Find a PHP + wp-cli combination that actually works. On some servers the
+# global `wp` or the default CLI PHP segfaults when loading the site (JIT /
+# opcache / extension bugs), so probe candidates against the real install
+# before trusting one. Exit codes 0/1 mean PHP survived; 139 is a segfault.
+PHP_ARGS=( -d opcache.enable_cli=0 -d opcache.jit=off -d opcache.jit_buffer_size=0 -d memory_limit=512M )
+WPCLI="/tmp/lal-wp-cli.phar"
+WP_BIN=()
+
+wp_works() {
+	run_as "$@" "${WP_FLAGS[@]}" core is-installed >/dev/null 2>&1
+	local st=$?
+	[ "$st" -le 1 ]
+}
+
+if command -v wp >/dev/null 2>&1 && wp_works wp; then
 	WP_BIN=(wp)
 else
-	WPCLI="/tmp/lal-wp-cli.phar"
 	[ -f "$WPCLI" ] || { say "Downloading wp-cli ..."; curl -sSL -o "$WPCLI" https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar; chmod +r "$WPCLI"; }
-	WP_BIN=(php "$WPCLI")
+	for p in php php8.3 php8.2 php8.1 php8.4 php8.0; do
+		command -v "$p" >/dev/null 2>&1 || continue
+		if wp_works "$p" "${PHP_ARGS[@]}" "$WPCLI"; then
+			say "Using $p + downloaded wp-cli (the server's own wp/php combination didn't work)"
+			WP_BIN=( "$p" "${PHP_ARGS[@]}" "$WPCLI" )
+			break
+		fi
+	done
 fi
-WP_FLAGS=( "--path=$WP_PATH" )
-[ "$(id -un)" = "root" ] && [ "$SITE_OWNER" = "root" ] && WP_FLAGS+=( "--allow-root" )
+[ "${#WP_BIN[@]}" -gt 0 ] || fail "Every PHP on this server crashes while loading the site through wp-cli.
+Run these and share the output:  php -v ; wp --version ; ls /usr/bin/php* /etc/php 2>/dev/null"
+
 wp() { run_as "${WP_BIN[@]}" "${WP_FLAGS[@]}" "$@"; }
 
 wp core is-installed || fail "WordPress at $WP_PATH is not installed."
